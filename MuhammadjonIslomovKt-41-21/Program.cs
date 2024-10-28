@@ -1,42 +1,46 @@
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using MuhammadjonIslomovKt_41_21.Database;
 using NLog;
 using NLog.Web;
-var builder = WebApplication.CreateBuilder(args);
+using Project.DataBase;
 
+var builder = WebApplication.CreateBuilder(args);
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-// Add services to the container.
 try
 {
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    // Add services to the container.
 
-builder.Services.AddDbContext<StudentDbContext>(options =>
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    builder.Services.AddDbContext<StudentDbCotext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
     var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-  app.UseAuthorization();
-
-  app.MapControllers();
-
-  app.Run();
-}
-catch(Exception ex)
+catch (Exception ex)
 {
-    logger.Error(ex, "Stopped program because of exception");
+    logger.Error(ex, "Stoped program because of exception");
 }
 finally
 {
     LogManager.Shutdown();
 }
-

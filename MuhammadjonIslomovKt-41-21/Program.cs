@@ -1,13 +1,17 @@
-using Microsoft.AspNetCore.Diagnostics;
+using _3_lab.Database;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
-using Project.DataBase;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+
 try
 {
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
     // Add services to the container.
 
     builder.Services.AddControllers();
@@ -15,7 +19,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    builder.Services.AddDbContext<StudentDbCotext>(options =>
+    builder.Services.AddDbContext<StudentDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
@@ -38,7 +42,7 @@ try
 }
 catch (Exception ex)
 {
-    logger.Error(ex, "Stoped program because of exception");
+    logger.Error(ex, "Stopped program because of exception");
 }
 finally
 {
